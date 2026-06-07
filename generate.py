@@ -12,7 +12,7 @@ Usage:
     --answers "2025:BDACAD" \\
     --answers-by-letter "2025:B D A C A D"
 
-Answers format:
+Supports PDF and DOCX files.
   --answers "2018:DABCCBD, 2025:BDACAD"
   Each answer string maps to the question list in order for that year.
 """
@@ -22,13 +22,14 @@ from pathlib import Path
 SKILL_DIR = Path(__file__).parent
 sys.path.insert(0, str(SKILL_DIR))
 
-from ocr_extract import extract_text_from_pdf, extract_questions, extract_options
+from ocr_extract import extract_text_from_file, extract_text_from_pdf, extract_questions, extract_options
 
-def find_pdf(papers_dir, year):
-    """Find PDF file for a given year in papers_dir."""
+def find_paper(papers_dir, year):
+    """Find PDF or DOCX file for a given year in papers_dir."""
     papers_dir = Path(papers_dir)
-    for f in papers_dir.glob(f"*{year}*.pdf"):
-        return str(f)
+    for ext in ['.pdf', '.docx']:
+        for f in papers_dir.glob(f"*{year}*{ext}"):
+            return str(f)
     return None
 
 def parse_question_spec(spec):
@@ -87,12 +88,12 @@ def main():
         year, nums = parse_question_spec(spec)
         print(f'Processing {year}: Q{nums}')
 
-        pdf_path = find_pdf(args.papers_dir, year)
+        pdf_path = find_paper(args.papers_dir, year)
         if not pdf_path:
-            print(f'  WARNING: No PDF found for {year}')
+            print(f'  WARNING: No PDF/DOCX found for {year}')
             continue
 
-        full_text, method = extract_text_from_pdf(pdf_path)
+        full_text, method = extract_text_from_file(pdf_path)
         print(f'  PDF extracted via {method} ({len(full_text)} chars)')
 
         questions = extract_questions(full_text, nums, year)

@@ -54,9 +54,14 @@ Generate Word docs via docx skill's docx-js pattern
 ## Prerequisites
 
 - `pdfplumber` for text-native PDFs
+- `python-docx` for Word document input
 - `pytesseract` + `pdf2image` for scanned PDFs (Chinese: `chi_sim.traineddata` in `~/.tessdata/`)
 - `docx` npm package for Word generation
 - Tesseract: Windows at `C:\Program Files\Tesseract-OCR\tesseract.exe`
+
+## Supported Input Formats
+
+PDF and DOCX files are both supported. The skill auto-detects format and extracts text accordingly.
 
 ## Implementation
 

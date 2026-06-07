@@ -1,6 +1,32 @@
-"""OCR and text extraction for exam papers. Handles both text-native and scanned PDFs."""
+"""OCR and text extraction for exam papers. Handles PDF, DOCX, and scanned PDFs."""
 import sys, os, json, re
 from pathlib import Path
+
+def extract_text_from_file(file_path):
+    """Extract text from any supported file. Returns (text, method)."""
+    ext = Path(file_path).suffix.lower()
+    if ext == '.docx':
+        return extract_text_from_docx(file_path), 'docx'
+    elif ext == '.pdf':
+        return extract_text_from_pdf(file_path)
+    else:
+        raise ValueError(f'Unsupported file type: {ext}')
+
+def extract_text_from_docx(docx_path):
+    """Extract text from a Word document."""
+    import docx
+    doc = docx.Document(docx_path)
+    text_parts = []
+    for para in doc.paragraphs:
+        if para.text.strip():
+            text_parts.append(para.text.strip())
+    # Also extract tables
+    for table in doc.tables:
+        for row in table.rows:
+            row_text = ' '.join(cell.text for cell in row.cells if cell.text.strip())
+            if row_text.strip():
+                text_parts.append(row_text)
+    return '\n'.join(text_parts)
 
 def extract_text_from_pdf(pdf_path):
     """Extract text from PDF - tries pdfplumber first, falls back to OCR."""
